@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ofrenda Local: a remembrance written on your own device</title>
+<style>
+:root{
+  --night:#14102b; --violet:#241a45; --plum:#3a2a66; --marigold:#f5a623; --flame:#ffd36b;
+  --bone:#f3ead8; --rose:#c2185b; --teal:#1aa6a0; --muted:#b9add6;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:radial-gradient(ellipse at 50% 0%,var(--violet),var(--night) 60%) fixed;color:var(--bone);
+  font:16px/1.6 Georgia,"Times New Roman",serif;min-height:100vh}
+.flags{display:flex;height:34px;overflow:hidden}
+.flags i{flex:1;min-width:26px;clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%);opacity:.9}
+.flags i:nth-child(4n+1){background:var(--rose)}.flags i:nth-child(4n+2){background:var(--marigold)}
+.flags i:nth-child(4n+3){background:var(--teal)}.flags i:nth-child(4n){background:var(--bone)}
+header{text-align:center;padding:28px 16px 6px}
+h1{font-size:clamp(2rem,6vw,3.4rem);margin:0;font-weight:400;letter-spacing:.01em}
+header p{max-width:56ch;margin:10px auto 0;color:var(--muted)}
+main{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:28px;max-width:1040px;margin:24px auto;padding:0 16px}
+@media(max-width:800px){main{grid-template-columns:1fr}}
+form{background:rgba(255,255,255,.05);border:1px solid var(--plum);border-radius:14px;padding:18px;align-self:start}
+label{display:block;font:600 .92rem system-ui,sans-serif;margin:12px 0 4px}
+input,textarea,select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--plum);background:var(--night);
+  color:var(--bone);font:inherit;font-size:.95rem}
+textarea{min-height:92px;resize:vertical}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--flame);outline-offset:2px}
+button{margin-top:16px;width:100%;padding:11px;border:0;border-radius:10px;background:var(--marigold);color:#2a1700;
+  font:700 1rem system-ui,sans-serif;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+button.ghost{background:transparent;color:var(--bone);border:1px solid var(--plum);margin-top:8px;padding:8px;font-weight:600;font-size:.9rem}
+.status{font:.85rem system-ui,sans-serif;color:var(--muted);margin-top:10px;min-height:1.3em}
+.bar{height:6px;background:var(--night);border-radius:4px;overflow:hidden;margin-top:6px;display:none}
+.bar b{display:block;height:100%;width:0;background:var(--marigold);transition:width .3s}
+.altar{display:flex;flex-direction:column;align-items:center;gap:0}
+.tier{width:100%;display:flex;flex-direction:column;align-items:center;padding:14px 12px 10px;
+  background:linear-gradient(var(--plum),var(--violet));border:1px solid #4b3a82;border-bottom:0}
+.tier.t1{width:62%;border-radius:14px 14px 0 0}.tier.t2{width:82%}.tier.t3{width:100%;border-bottom:1px solid #4b3a82;border-radius:0 0 10px 10px}
+.marigolds{letter-spacing:.1em;font-size:1.25rem;line-height:1.3;text-align:center;word-break:break-all}
+.candles{display:flex;gap:22px;justify-content:center;align-items:flex-end;margin:6px 0}
+.candle{width:14px;height:44px;background:var(--bone);border-radius:3px;position:relative;margin-top:22px}
+.candle::before{content:"";position:absolute;left:50%;top:-20px;width:12px;height:20px;margin-left:-6px;
+  background:radial-gradient(ellipse at 50% 70%,#fff6d0,var(--flame) 45%,var(--marigold) 75%,transparent 76%);
+  border-radius:50% 50% 50% 50%/65% 65% 35% 35%;box-shadow:0 0 22px 8px rgba(245,166,35,.55);
+  animation:flick 1.6s ease-in-out infinite;transform-origin:50% 100%;opacity:0}
+.lit .candle::before{opacity:1}
+.candle:nth-child(2)::before{animation-delay:-.5s}.candle:nth-child(3)::before{animation-delay:-1s}
+@keyframes flick{0%,100%{transform:scale(1) rotate(-2deg)}35%{transform:scale(1.08,.94) rotate(2deg)}70%{transform:scale(.94,1.06) rotate(-1deg)}}
+.frame{border:6px double var(--marigold);padding:16px 22px;text-align:center;min-width:200px;max-width:100%;background:var(--night)}
+.frame .nm{font-size:1.5rem;overflow-wrap:anywhere}.frame .rel{color:var(--muted);font:.9rem system-ui,sans-serif}
+.gifts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.gift{background:var(--night);border:1px solid var(--plum);border-radius:999px;padding:4px 12px;font:.88rem system-ui,sans-serif;overflow-wrap:anywhere}
+.note{width:100%;margin-top:18px;background:var(--bone);color:#2b2140;border-radius:12px;padding:20px 22px;min-height:120px}
+.note p{margin:0;white-space:pre-wrap;font-size:1.05rem;line-height:1.75}
+.note .empty{color:#6d6288;font-style:italic}
+.note small{display:block;margin-top:12px;color:#6d6288;font:.8rem system-ui,sans-serif}
+.cursor::after{content:"|";animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+footer{text-align:center;color:var(--muted);font:.82rem system-ui,sans-serif;padding:8px 16px 28px}
+@media(prefers-reduced-motion:reduce){.candle::before,.cursor::after{animation:none}.bar b{transition:none}}
+</style>
+</head>
+<body>
+<div class="flags" aria-hidden="true" id="flags"></div>
+<header>
+  <h1>Ofrenda Local</h1>
+  <p>Build a small altar for someone you miss. A language model running inside this page writes the remembrance. Nothing you type leaves your device.</p>
+</header>
+
+<main>
+  <form id="f">
+    <label for="name">Who are you remembering?</label>
+    <input id="name" required maxlength="60" placeholder="e.g. Nani">
+    <label for="rel">Who were they to you?</label>
+    <input id="rel" maxlength="60" placeholder="e.g. my grandmother">
+    <label for="food">A favorite food or drink</label>
+    <input id="food" maxlength="60" placeholder="e.g. Hot jalebi with milk">
+    <label for="song">A favorite song or sound</label>
+    <input id="song" maxlength="60" placeholder="e.g. Old Kishore Kumar records">
+    <label for="story">A memory or story</label>
+    <textarea id="story" required maxlength="700" placeholder="The thing she always said, a smell, a small habit..."></textarea>
+    <label for="model">Model (runs locally)</label>
+    <select id="model">
+      <option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M: smallest, fastest</option>
+      <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC" selected>Llama 3.2 1B: balanced</option>
+      <option value="gemma-2-2b-it-q4f16_1-MLC">Gemma 2 2B: best writing, larger download</option>
+    </select>
+    <button id="go" type="submit">Light the candles</button>
+    <button id="copy" class="ghost" type="button" hidden>Copy remembrance</button>
+    <div class="bar" id="bar"><b id="fill"></b></div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </form>
+
+  <section class="altar" aria-label="Your ofrenda" id="altar">
+    <div class="tier t1">
+      <div class="marigolds" aria-hidden="true">🌼🌼🌼🌼🌼</div>
+      <div class="candles"><div class="candle"></div><div class="candle"></div><div class="candle"></div></div>
+      <div class="frame"><div class="nm" id="vName">Their name</div><div class="rel" id="vRel">Fill in the form to begin</div></div>
+    </div>
+    <div class="tier t2">
+      <div class="gifts" id="gifts"><span class="gift">🕯️ offerings appear here</span></div>
+    </div>
+    <div class="tier t3"><div class="marigolds" aria-hidden="true">🌼🏵️🌼🏵️🌼🏵️🌼🏵️🌼🏵️🌼🏵️🌼</div></div>
+    <div class="note" aria-live="polite">
+      <p id="out" class="empty">Your remembrance will be written here.</p>
+      <small id="meta"></small>
+    </div>
+  </section>
+</main>
+<footer>Open-weight model + WebLLM + WebGPU. The first run downloads the model once, then it is cached by your browser.</footer>
+
+<script type="module">
+import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm";
+
+const $ = id => document.getElementById(id);
+$("flags").innerHTML = "<i></i>".repeat(60);
+
+let engine = null, loadedId = null;
+
+const setStatus = t => $("status").textContent = t;
+
+async function getEngine(id){
+  if (engine && loadedId === id) return engine;
+  $("bar").style.display = "block";
+  engine = await webllm.CreateMLCEngine(id, {
+    initProgressCallback: p => {
+      $("fill").style.width = Math.round((p.progress || 0) * 100) + "%";
+      setStatus(p.text || "Loading model...");
+    }
+  });
+  loadedId = id;
+  $("bar").style.display = "none";
+  return engine;
+}
+
+function fallbackText(d){
+  return `${d.name}, you are still here in the small things.` +
+    (d.food ? ` Every time I smell ${d.food}, I am back in your kitchen.` : "") +
+    (d.song ? ` When I hear ${d.song}, I think of you.` : "") +
+    ` I remember this: ${d.story}\n\nThank you for all of it. The candle is lit, and the door is open.`;
+}
+
+function buildPrompt(d){
+  const sys = "You write short, sincere remembrances for a Día de los Muertos ofrenda. " +
+    "Write 110 to 150 words, in first person, addressed directly to the loved one as 'you'. " +
+    "Use ONLY the details provided. Do not invent names, places, dates or events. " +
+    "Warm, plain language. No emojis, no headings, no bullet points. End with a quiet closing line.";
+  const user = `Loved one: ${d.name}\nRelationship: ${d.rel || "someone dear to me"}\n` +
+    `Favorite food or drink: ${d.food || "not given"}\nFavorite song or sound: ${d.song || "not given"}\n` +
+    `A memory: ${d.story}`;
+  return [{role:"system",content:sys},{role:"user",content:user}];
+}
+
+function paintAltar(d){
+  $("vName").textContent = d.name;
+  $("vRel").textContent = d.rel || "";
+  const g = $("gifts"); g.textContent = "";
+  [["🍞", d.food], ["🎵", d.song]].forEach(([icon, v]) => {
+    if (!v) return;
+    const s = document.createElement("span"); s.className = "gift"; s.textContent = icon + " " + v; g.appendChild(s);
+  });
+  if (!g.children.length){ const s = document.createElement("span"); s.className = "gift"; s.textContent = "🕯️ a candle for you"; g.appendChild(s); }
+  $("altar").classList.add("lit");
+}
+
+$("f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const d = {name:$("name").value.trim(), rel:$("rel").value.trim(), food:$("food").value.trim(),
+             song:$("song").value.trim(), story:$("story").value.trim()};
+  paintAltar(d);
+  const out = $("out"); out.className = "cursor"; out.textContent = "";
+  $("meta").textContent = ""; $("copy").hidden = true; $("go").disabled = true;
+  const t0 = performance.now();
+  try {
+    if (!("gpu" in navigator)) throw new Error("nogpu");
+    const eng = await getEngine($("model").value);
+    setStatus("Writing...");
+    let text = "";
+    const stream = await eng.chat.completions.create({messages: buildPrompt(d), stream:true, temperature:0.8, max_tokens:320});
+    for await (const ch of stream){
+      text += ch.choices[0]?.delta?.content || "";
+      out.textContent = text;
+    }
+    $("meta").textContent = `Written locally by ${loadedId} in ${((performance.now()-t0)/1000).toFixed(1)}s. No server involved.`;
+    setStatus("");
+  } catch (err){
+    out.textContent = fallbackText(d);
+    $("meta").textContent = "Simple template shown because the local model could not run.";
+    setStatus(err.message === "nogpu"
+      ? "WebGPU is not available in this browser. Use desktop Chrome or Edge for the AI version."
+      : "Model failed to load: " + err.message);
+    $("bar").style.display = "none";
+  }
+  out.className = ""; $("go").disabled = false; $("copy").hidden = false;
+});
+
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("out").textContent); setStatus("Copied."); }
+  catch { setStatus("Copy failed. Select the text and copy it manually."); }
+});
+</script>
+</body>
+</html>
